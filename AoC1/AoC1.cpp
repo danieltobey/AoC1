@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <deque>
 using namespace std;
 
 int main()
@@ -116,6 +117,98 @@ int main()
 	}
 	case 31:
 	{
+		ifstream in( "input3.txt" );
+		string strVal;
+		int oneCnt[12] = { 0 };
+		int rowCnt = 0;
+		while ( getline( in, strVal ) )
+		{
+			rowCnt++;
+			for ( int i = 0; i < 12; i++ )
+			{
+				if ( strVal[i] == '1' )
+					oneCnt[i]++;
+			}
+		}
+		int g = 0, e = 0;
+		for ( int i = 0; i < 12; i++ )
+		{
+			g <<= 1;
+			e <<= 1;
+			if ( oneCnt[i] > rowCnt / 2 )
+				g |= 1;
+			else
+				e |= 1;
+		}
+		cout << g * e;
+		break;
+	}
+	case 32:
+	{
+		ifstream in( "input3d.txt" );
+		string strVal;
+		const size_t arrSz = 5;
+		int oneCnt[arrSz] = { 0 };
+		int rowCnt = 0;
+
+		while ( getline( in, strVal ) )
+		{
+			rowCnt++;
+			for ( int i = 0; i < arrSz; i++ )
+			{
+				if ( strVal[i] == '1' )
+					oneCnt[i]++;
+			}
+		}
+		int most = 0, least = 0;
+		for ( int i = 0; i < arrSz; i++ )
+		{
+			most <<= 1;
+			least <<= 1;
+			if ( oneCnt[i] >= rowCnt / 2 )
+				most |= 1;
+			else
+				least |= 1;
+		}
+		
+		deque<int> allVals;
+		for ( int col = 0; col < arrSz; col++ )
+		{
+			// Back to start
+			in.clear();
+			in.seekg( 0, std::ios::beg );
+			int mostCnt = 0;
+			int mostVal = 0;
+			while ( getline( in, strVal ) )
+			{
+				int in = stoi( strVal, 0, 2 ); // Get in integer type
+				int currMostCnt = 0;
+
+				/*
+				int val[arrSz] = { 0 };
+
+				for ( int i = 0; i < arrSz; i++ )
+				{
+					if ( strVal[i] == '1' )
+						val[i]++;
+				}
+				*/
+				for ( int i = arrSz - 1; i >= 0; i-- )
+				{
+					if ( ( (in >> i) & 1 ) != ( (most >> i) & 1 ) )
+						break;
+					currMostCnt++;
+				}
+				if ( currMostCnt > mostCnt )
+				{
+					mostCnt = currMostCnt;
+					mostVal = in;
+				}
+			}
+		}
+		
+
+		cout << most * least;
 		break;
 	}
 	default:
