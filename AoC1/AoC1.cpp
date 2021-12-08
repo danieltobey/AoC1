@@ -114,6 +114,10 @@ int main()
 		cout << pos * dep;
 		break;
 	}
+	case 31:
+	{
+		break;
+	}
 	default:
 		;
 	}
