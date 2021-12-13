@@ -147,15 +147,12 @@ int main()
 	{
 		ifstream in( "input3.txt" );
 		string strVal;
-		const auto arrSz = 12;
-		int oneCnt[arrSz] = { 0 };
-		int rowCnt = 0;
-
 		deque<string> allVals;
 
 		// Build deque of input
 		while ( getline( in, strVal ) )
 			allVals.push_back( strVal );
+		const auto arrSz = allVals[0].size();
 
 		// Go through list and count most in each position,
 		// then eliminate values that don't have the most
@@ -175,6 +172,7 @@ int main()
 				char most = '0';
 				if ( ((double)cntOfOnes / myVals.size()) >= 0.5 )
 					most = '1';
+
 				for ( auto row = myVals.begin(); row != myVals.end() && myVals.size() > 1; )
 				{
 					if ( (*row)[col] == most)
@@ -193,6 +191,7 @@ int main()
 					}
 				}
 			}
+
 			for ( int col = 0; col < arrSz; col++ )
 			{
 				results[state] <<= 1;
