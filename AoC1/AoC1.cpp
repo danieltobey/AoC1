@@ -145,70 +145,62 @@ int main()
 	}
 	case 32:
 	{
-		ifstream in( "input3d.txt" );
+		ifstream in( "input3.txt" );
 		string strVal;
-		const size_t arrSz = 5;
+		const auto arrSz = 12;
 		int oneCnt[arrSz] = { 0 };
 		int rowCnt = 0;
 
+		deque<string> allVals;
+
+		// Build deque of input
 		while ( getline( in, strVal ) )
-		{
-			rowCnt++;
-			for ( int i = 0; i < arrSz; i++ )
-			{
-				if ( strVal[i] == '1' )
-					oneCnt[i]++;
-			}
-		}
-		int most = 0, least = 0;
-		for ( int i = 0; i < arrSz; i++ )
-		{
-			most <<= 1;
-			least <<= 1;
-			if ( oneCnt[i] >= rowCnt / 2 )
-				most |= 1;
-			else
-				least |= 1;
-		}
-		
-		deque<int> allVals;
-		for ( int col = 0; col < arrSz; col++ )
-		{
-			// Back to start
-			in.clear();
-			in.seekg( 0, std::ios::beg );
-			int mostCnt = 0;
-			int mostVal = 0;
-			while ( getline( in, strVal ) )
-			{
-				int in = stoi( strVal, 0, 2 ); // Get in integer type
-				int currMostCnt = 0;
+			allVals.push_back( strVal );
 
-				/*
-				int val[arrSz] = { 0 };
-
-				for ( int i = 0; i < arrSz; i++ )
+		// Go through list and count most in each position,
+		// then eliminate values that don't have the most
+		// in given position
+		int results[2] = { 0 };
+		for ( int state = 0; state < 2; state++ )
+		{
+			auto myVals = allVals;
+			for ( int col = 0; col < arrSz && myVals.size() > 1; col++ )
+			{
+				int cntOfOnes = 0;
+				for ( auto row = myVals.begin(); row != myVals.end(); row++ )
 				{
-					if ( strVal[i] == '1' )
-						val[i]++;
+					if ( (*row)[col] == '1' )
+						cntOfOnes++;
 				}
-				*/
-				for ( int i = arrSz - 1; i >= 0; i-- )
+				char most = '0';
+				if ( ((double)cntOfOnes / myVals.size()) >= 0.5 )
+					most = '1';
+				for ( auto row = myVals.begin(); row != myVals.end() && myVals.size() > 1; )
 				{
-					if ( ( (in >> i) & 1 ) != ( (most >> i) & 1 ) )
-						break;
-					currMostCnt++;
-				}
-				if ( currMostCnt > mostCnt )
-				{
-					mostCnt = currMostCnt;
-					mostVal = in;
+					if ( (*row)[col] == most)
+					{
+						if ( state == 0 )
+							row++;
+						else
+							row = myVals.erase( row );
+					}
+					else
+					{
+						if ( state == 0 )
+							row = myVals.erase( row );
+						else
+							row++;
+					}
 				}
 			}
+			for ( int col = 0; col < arrSz; col++ )
+			{
+				results[state] <<= 1;
+				if ( myVals[0][col] == '1' )
+					results[state] |= 1;
+			}
 		}
-		
-
-		cout << most * least;
+		cout << results[0] * results[1];
 		break;
 	}
 	default:
