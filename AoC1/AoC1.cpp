@@ -325,7 +325,7 @@ int main()
 		typedef vector< Number > Row;
 		typedef vector< Row > Square;
 		Square square;
-		vector< Square > squares;
+		deque< Square > squares;
 		getline( in, strIn ); // First line is blank
 		while ( getline( in, strIn ) )
 		{
@@ -345,6 +345,7 @@ int main()
 
 			square.push_back( row );
 		}
+		squares.push_back( square );
 
 		// Start marking numbers
 		Square lastWinner;
@@ -367,9 +368,7 @@ int main()
 				{
 					fullRow = true;
 					for ( int col = 0; col < (*square)[row].size() && fullRow; col++ )
-					{
 						fullRow &= (*square)[row][col].second;
-					}
 					if ( fullRow )
 					{
 						// Yes, pull it out of the list
@@ -388,9 +387,7 @@ int main()
 				{
 					fullCol = true;
 					for ( int row = 0; row < (*square).size() && fullCol; row++ )
-					{
 						fullCol &= (*square)[row][col].second;
-					}
 					if ( fullCol )
 					{
 						// Yes, pull it out of the list
@@ -409,13 +406,10 @@ int main()
 
 		int unmarkedSum = 0;
 		for ( auto row = lastWinner.begin(); row != lastWinner.end(); row++ )
-		{
 			for ( auto number = (*row).begin(); number != (*row).end(); number++ )
-			{
 				if ( !(*number).second )
 					unmarkedSum += (*number).first;
-			}
-		}
+
 		cout << unmarkedSum * winnerVal;
 		break;
 	}
