@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <deque>
+#include <vector>
 using namespace std;
 
 int main()
@@ -202,18 +203,110 @@ int main()
 		cout << results[0] * results[1];
 		break;
 	}
+	case 41:
+	{
+		ifstream in( "input4.txt" );
+		string strIn;
+		vector< int > drawnVals;
+
+		getline( in, strIn );
+		
+		// Get drawn values
+		stringstream ssIn( strIn );
+		string strTemp;
+		while ( getline( ssIn, strTemp, ',' ) )
+			drawnVals.push_back( stoi( strTemp ) );
+
+		// Get all our Bingo squares
+		typedef pair< int, bool > Number; // Value and whether it's been drawn
+		typedef vector< Number > Row;
+		typedef vector< Row > Square;
+		Square square;
+		vector< Square > squares;
+		getline( in, strIn ); // First line is blank
+		while ( getline( in, strIn ) )
+		{
+			if ( strIn.length() == 0 )
+			{
+				squares.push_back( square );
+				square.clear();
+				continue;
+			}
+
+			stringstream ssIn( strIn );
+			string strTemp;
+			Row row;
+			while ( getline( ssIn, strTemp, ' ' ) )
+				if ( strTemp.length() != 0 )
+					row.push_back( Number( stoi( strTemp ), false ) );
+
+			square.push_back( row );
+		}
+
+		// Start marking numbers
+		for ( auto val = drawnVals.begin(); val != drawnVals.end(); val++ )
+		{
+			for ( auto square = squares.begin(); square != squares.end(); square++ )
+				for ( auto row = (*square).begin(); row != (*square).end(); row++ )
+					for ( auto number = (*row).begin(); number != (*row).end(); number++ )
+						if ( (*number).first == *val )
+							(*number).second = true;
+
+			// Check if a square has a full row/col
+			auto square = squares.begin();
+			for ( ; square != squares.end(); square++ )
+			{
+				bool fullRow = false;
+				// Check for a row first
+				for ( int row = 0; row < (*square).size(); row++ )
+				{
+					fullRow = true;
+					for ( int col = 0; col < (*square)[row].size() && fullRow; col++ )
+					{
+						fullRow &= (*square)[row][col].second;
+					}
+					if ( fullRow )
+						break;
+				}
+
+				// Now check for a column
+				bool fullCol = false;
+				for ( int col = 0; col < (*square)[0].size(); col++ )
+				{
+					fullCol = true;
+					for ( int row = 0; row < (*square).size() && fullCol; row++ )
+					{
+						fullCol &= (*square)[row][col].second;
+					}
+					if ( fullCol )
+						break;
+				}
+				if ( fullCol )
+					break;
+			}
+
+			// Did we find one?
+			if ( square != squares.end() )
+			{
+				// Yes! Bingo!
+				cout << "Bingo!";
+				int unmarkedSum = 0;
+				for ( auto row = (*square).begin(); row != (*square).end(); row++ )
+				{
+					for ( auto number = (*row).begin(); number != (*row).end(); number++ )
+					{
+						if ( !(*number).second )
+							unmarkedSum += (*number).first;
+					}
+				}
+				cout << unmarkedSum * *val;
+				break;
+			}
+		}
+
+		break;
+	}
 	default:
 		;
 	}
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
