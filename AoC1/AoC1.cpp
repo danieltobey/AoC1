@@ -306,6 +306,119 @@ int main()
 
 		break;
 	}
+	case 42:
+	{
+		ifstream in( "input4.txt" );
+		string strIn;
+		vector< int > drawnVals;
+
+		getline( in, strIn );
+
+		// Get drawn values
+		stringstream ssIn( strIn );
+		string strTemp;
+		while ( getline( ssIn, strTemp, ',' ) )
+			drawnVals.push_back( stoi( strTemp ) );
+
+		// Get all our Bingo squares
+		typedef pair< int, bool > Number; // Value and whether it's been drawn
+		typedef vector< Number > Row;
+		typedef vector< Row > Square;
+		Square square;
+		vector< Square > squares;
+		getline( in, strIn ); // First line is blank
+		while ( getline( in, strIn ) )
+		{
+			if ( strIn.length() == 0 )
+			{
+				squares.push_back( square );
+				square.clear();
+				continue;
+			}
+
+			stringstream ssIn( strIn );
+			string strTemp;
+			Row row;
+			while ( getline( ssIn, strTemp, ' ' ) )
+				if ( strTemp.length() != 0 )
+					row.push_back( Number( stoi( strTemp ), false ) );
+
+			square.push_back( row );
+		}
+
+		// Start marking numbers
+		Square lastWinner;
+		int winnerVal;
+		for ( auto val = drawnVals.begin(); val != drawnVals.end(); val++ )
+		{
+			for ( auto square = squares.begin(); square != squares.end(); square++ )
+				for ( auto row = (*square).begin(); row != (*square).end(); row++ )
+					for ( auto number = (*row).begin(); number != (*row).end(); number++ )
+						if ( (*number).first == *val )
+							(*number).second = true;
+
+			// Check if a square has a full row/col
+			auto square = squares.begin();
+			for ( ; square != squares.end(); )
+			{
+				bool fullRow = false;
+				// Check for a row first
+				for ( int row = 0; row < (*square).size(); row++ )
+				{
+					fullRow = true;
+					for ( int col = 0; col < (*square)[row].size() && fullRow; col++ )
+					{
+						fullRow &= (*square)[row][col].second;
+					}
+					if ( fullRow )
+					{
+						// Yes, pull it out of the list
+						lastWinner = *square;
+						winnerVal = *val;
+						square = squares.erase( square );
+						break;
+					}
+				}
+				if ( fullRow )
+					continue;
+
+				// Now check for a column
+				bool fullCol = false;
+				for ( int col = 0; col < (*square)[0].size(); col++ )
+				{
+					fullCol = true;
+					for ( int row = 0; row < (*square).size() && fullCol; row++ )
+					{
+						fullCol &= (*square)[row][col].second;
+					}
+					if ( fullCol )
+					{
+						// Yes, pull it out of the list
+						lastWinner = *square;
+						winnerVal = *val;
+						square = squares.erase( square );
+						break;
+					}
+				}
+				if ( fullCol )
+					continue;
+
+				square++;
+			}
+		}
+
+		int unmarkedSum = 0;
+		for ( auto row = lastWinner.begin(); row != lastWinner.end(); row++ )
+		{
+			for ( auto number = (*row).begin(); number != (*row).end(); number++ )
+			{
+				if ( !(*number).second )
+					unmarkedSum += (*number).first;
+			}
+		}
+		cout << unmarkedSum * winnerVal;
+		break;
+	}
 	default:
 		;
 	}
